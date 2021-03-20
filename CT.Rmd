@@ -1,0 +1,63 @@
+---
+title: "CT Values"
+author: "Mwaura Patrick"
+date: "3/17/2021"
+output: word_document
+---
+CT3
+```{r setup, include=FALSE}
+setwd("E:/RESULTS/Mwaura/mwaura/23-12-2020/COVID RESULTS/Export")
+library(readxl)
+library(plyr)
+library(xlsx)
+library(dplyr)
+library(plyr)
+library(pipeR)
+library(reshape2)
+library(tidyverse)
+library(janitor)
+filenames <- list.files(pattern=".xls")
+df.list <- lapply(filenames, function(x) read.xlsx(file=x, sheetName="Results",as.data.frame=TRUE, header=TRUE))
+final.df <- rbind.fill(df.list)
+#View(final.df)
+CT<-final.df %>% select(NA..1,NA..2,NA..17) %>%filter(!is.na(NA..1)) %>% filter(NA..17!="CT")
+colnames(CT) <- c("UCI", "Genes","CTVal")
+CT$Genes <- revalue(CT$Genes, c("Target 1"="IPC"))
+CT$Genes <- revalue(CT$Genes, c("Target 2"="RdRP"))
+CT$Genes <- revalue(CT$Genes, c("Target 3"="S-GENE"))
+CT$Genes <- revalue(CT$Genes, c("FAM"="S-GENE"))
+
+CT1 <- CT %>% mutate_each(funs(toupper), Genes)
+
+CT1$Genes <- revalue(CT1$Genes, c("IPC GENE"="IPC"))
+CT1$Genes <- revalue(CT1$Genes, c("RDRP GENE"="RDRP"))
+CT1$Genes <- revalue(CT1$Genes, c("S GENE"="S-GENE"))
+CT1$Genes <- revalue(CT1$Genes, c("SGENE"="S-GENE"))
+
+CT2<-CT1%>% mutate(Genes = str_trim(Genes, side = "both"))
+
+CT3<-reshape(CT2, direction = "wide", idvar=c("UCI"), timevar="Genes")
+write.csv(CT3,"E:/RESULTS/Mwaura/mwaura/23-12-2020/COVID RESULTS/Export\\CT3.csv", row.names = FALSE)
+
+
+```
+
+#### 7500
+```{r}
+library(readxl)
+CT_Vals <- read_excel("E:/RESULTS/Mwaura/mwaura/23-12-2020/COVID RESULTS/7500/CT Vals.xlsx")
+CT_Vals<-CT_Vals %>% filter(!is.na(UCI))
+colnames(CT_Vals) <- c("UCI", "Genes","CTVal")
+CT_Vals<- CT_Vals %>% mutate_each(funs(toupper), Genes)
+
+CT_Vals$Genes <- revalue(CT_Vals$Genes, c("IPC GENE"="IPC"))
+CT_Vals$Genes <- revalue(CT_Vals$Genes, c("RDRP GENE"="RDRP"))
+CT_Vals$Genes <- revalue(CT_Vals$Genes, c("S GENE"="S-GENE"))
+
+CT4<-CT_Vals%>% mutate(Genes = str_trim(Genes, side = "both")) %>% as.data.frame()
+
+CT5<-reshape(CT4, direction = "wide", idvar=c("UCI"), timevar="Genes")
+CT5
+write.csv(CT5,"E:/RESULTS/Mwaura/mwaura/23-12-2020/COVID RESULTS/Export\\CT7500.csv", row.names = FALSE)
+```
+
